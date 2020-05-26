@@ -1,0 +1,59 @@
+# The Makefile files are initially inspired by:
+# https://www.oreilly.com/library/view/managing-projects-with/0596006101/ch06.html
+
+# Collect information from each module in these four variables.
+# Initialize them here as simple variables.
+programs     :=
+sources      :=
+libraries    :=
+extra_clean  :=
+
+exec_name := try_me
+
+objects      = $(subst .c,.o,$(sources))
+dependencies = $(subst .c,.d,$(sources))
+
+include_dirs := maths_func/add maths_func/sub other_func maths_func
+CPPFLAGS     += $(addprefix -I,$(include_dirs))
+vpath %.h $(include_dirs)
+
+MV  := mv -f
+RM  := rm -f
+SED := sed
+
+# We must read the include files before the all target is defined.
+# The include modules contain targets, the first of which will be considered
+# the default goal. To work through this dilemma, we can specify the all
+# target with no prerequisites, source the include files, then add the
+# prerequisites to all later.
+all:
+
+include app/rules.mk
+include maths_func/rules.mk
+include other_func/rules.mk
+
+.PHONY: all
+all: $(programs)
+	$(CC) -o $(exec_name) $(objects)
+
+.PHONY: libraries
+libraries: $(libraries)
+
+.PHONY: clean
+clean:
+	$(RM) $(objects) $(programs) $(libraries) \
+		$(dependencies) $(extra_clean)
+
+ifneq "$(MAKECMDGOALS)" "clean"
+	include $(dependencies)
+endif
+
+%.c %.h: %.y
+	$(YACC.y) --defines $<
+	$(MV) y.tab.c $*.c
+	$(MV) y.tab.h $*.h
+
+%.d: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M $< | \
+		$(SED) 's,\($(notdir $*)\.o\) *:,$(dir $@)\1 $@: ,' > $@.tmp
+	$(MV) $@.tmp $@
