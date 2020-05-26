@@ -1,8 +1,23 @@
 # The Makefile files are initially inspired by:
 # https://www.oreilly.com/library/view/managing-projects-with/0596006101/ch06.html
 
+# $(subdirectory) will be used by included rules.mk files to get there current
+# path. For example in the maths_func/sub/rules.mk file, the $(subdirectory)
+# variable will be read as "maths_func/sub"
+subdirectory = $(patsubst %/rules.mk,%,                        \
+                 $(word                                        \
+                   $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+
+# $(my_dir_name) will be used by included rules.mk files to get there current
+# directory name.
+# For example the file maths_func/add/rules.mk will have a my_dir_name value
+# equal to "add"
+my_dir_name = $(notdir $(patsubst %/,%,$(subdirectory)))
+
+
 # Collect information from each module in these four variables.
 # Initialize them here as simple variables.
+modules      := $(subst /rules.mk,,$(shell find . -name rules.mk))
 programs     :=
 sources      :=
 libraries    :=
@@ -28,9 +43,8 @@ SED := sed
 # prerequisites to all later.
 all:
 
-include app/rules.mk
-include maths_func/rules.mk
-include other_func/rules.mk
+# Automatically include rules.mk files
+include $(addsuffix /rules.mk,$(modules))
 
 .PHONY: all
 all: $(programs)
