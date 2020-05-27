@@ -17,7 +17,7 @@ my_dir_name = $(notdir $(patsubst %/,%,$(subdirectory)))
 
 # Collect information from each module in these four variables.
 # Initialize them here as simple variables.
-modules      := $(subst /rules.mk,,$(shell find . -name rules.mk))
+modules      := $(subst ./,,$(subst /rules.mk,,$(shell find . -name rules.mk)))
 programs     :=
 sources      :=
 libraries    :=
@@ -28,9 +28,8 @@ exec_name := try_me
 objects      = $(subst .c,.o,$(sources))
 dependencies = $(subst .c,.d,$(sources))
 
-include_dirs := maths_func/add maths_func/sub other_func maths_func
+include_dirs :=
 CPPFLAGS     += $(addprefix -I,$(include_dirs))
-vpath %.h $(include_dirs)
 
 MV  := mv -f
 RM  := rm -f

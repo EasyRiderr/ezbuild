@@ -3,6 +3,10 @@ local_lib  := $(subdirectory)/$(my_dir_name).a
 local_src :=
 local_inc :=
 
+local_src += say_hi.c
+
+local_inc += $(subdirectory)
+
 local_src  := $(addprefix $(subdirectory)/,$(local_src))
 local_objs := $(subst .c,.o,$(local_src))
 
