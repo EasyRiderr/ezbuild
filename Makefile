@@ -21,7 +21,6 @@ modules      := $(subst ./,,$(subst /rules.mk,,$(shell find . -name rules.mk)))
 programs     :=
 sources      :=
 libraries    :=
-extra_clean  :=
 
 exec_name := try_me
 
@@ -46,7 +45,7 @@ all:
 include $(addsuffix /rules.mk,$(modules))
 
 .PHONY: all
-all: $(programs)
+all: $(programs) $(dependencies)
 	$(CC) -o $(exec_name) $(objects)
 
 .PHONY: libraries
@@ -54,8 +53,7 @@ libraries: $(libraries)
 
 .PHONY: clean
 clean:
-	$(RM) $(objects) $(programs) $(libraries) \
-		$(dependencies) $(extra_clean)
+	$(RM) $(objects) $(programs) $(libraries) $(dependencies)
 
 ifneq "$(MAKECMDGOALS)" "clean"
 	include $(dependencies)
@@ -66,7 +64,7 @@ endif
 	$(MV) y.tab.c $*.c
 	$(MV) y.tab.h $*.h
 
-%.d: %.c
+%.d: $(sources)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M $< | \
 		$(SED) 's,\($(notdir $*)\.o\) *:,$(dir $@)\1 $@: ,' > $@.tmp
 	$(MV) $@.tmp $@
