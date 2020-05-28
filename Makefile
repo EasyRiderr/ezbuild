@@ -15,23 +15,28 @@ subdirectory = $(patsubst %/rules.mk,%,                        \
 my_dir_name = $(notdir $(patsubst %/,%,$(subdirectory)))
 
 
+# The directory where compiled files will be stored
+build_dir := build
+
+
 # Collect information from each module in these four variables.
 # Initialize them here as simple variables.
-modules      := $(subst ./,,$(subst /rules.mk,,$(shell find . -name rules.mk)))
-programs     :=
-sources      :=
-libraries    :=
+modules := $(subst ./,,$(subst /rules.mk,,$(shell find . -name rules.mk)))
+programs :=
+sources :=
+libraries :=
+dirs :=
 
 exec_name := try_me
 
-objects      = $(subst .c,.o,$(sources))
+objects :=
 dependencies = $(subst .c,.d,$(sources))
 
 include_dirs :=
-CPPFLAGS     += $(addprefix -I,$(include_dirs))
+CFLAGS += $(addprefix -I,$(include_dirs))
 
-MV  := mv -f
-RM  := rm -f
+MV := mv -f
+RM := rm -rf
 SED := sed
 
 # We must read the include files before the all target is defined.
@@ -45,15 +50,24 @@ all:
 include $(addsuffix /rules.mk,$(modules))
 
 .PHONY: all
-all: $(programs) $(dependencies)
-	$(CC) -o $(exec_name) $(objects)
+all: $(dirs) $(build_dir)/$(exec_name)
+
+$(build_dir)/$(exec_name): $(objects)
+	$(CC) $^ -o $@
+
+$(objects): $(build_dir)/%.o : %.c $(dirs)
+	@echo "Compile $< and store it in $@"
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(dirs):
+	@mkdir -p $@
 
 .PHONY: libraries
 libraries: $(libraries)
 
 .PHONY: clean
 clean:
-	$(RM) $(objects) $(programs) $(libraries) $(dependencies)
+	$(RM) $(build_dir)
 
 ifneq "$(MAKECMDGOALS)" "clean"
 	include $(dependencies)
