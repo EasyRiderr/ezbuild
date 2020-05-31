@@ -24,7 +24,6 @@ build_dir := build
 modules := $(subst ./,,$(subst /rules.mk,,$(shell find . -name rules.mk)))
 programs :=
 sources :=
-libraries :=
 dirs :=
 
 exec_name := try_me
@@ -86,9 +85,6 @@ $(objects): $(build_dir)/%.o : %.c | $(dirs) .config
 
 $(dirs):
 	@mkdir -p $@
-
-.PHONY: libraries
-libraries: $(libraries)
 
 .PHONY: clean
 clean:
