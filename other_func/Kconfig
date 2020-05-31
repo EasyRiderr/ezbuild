@@ -1,0 +1,2 @@
+# Nothing special to do in this directory yet, include subdirectory Kconfig
+source say_hi/Kconfig

@@ -3,8 +3,13 @@ local_lib  := $(subdirectory)/$(my_dir_name).a
 local_src :=
 local_inc :=
 
-local_src += add.c
-local_src += add_2.c
+ifdef CONFIG_ADD
+  local_src += add.c
+endif
+
+ifdef CONFIG_ADD_2
+  local_src += add_2.c
+endif
 
 local_inc += $(subdirectory)
 

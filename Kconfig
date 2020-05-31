@@ -1,0 +1,5 @@
+mainmenu "EZbuild"
+
+# Include subdirectories Kconfig
+source maths_func/Kconfig
+source other_func/Kconfig

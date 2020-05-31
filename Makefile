@@ -46,6 +46,32 @@ SED := sed
 # prerequisites to all later.
 all:
 
+
+#Include the configuration file
+-include .config
+CFLAGS += $(addprefix -I,include/generated)
+
+# Let's use the mono black skin of the make menuconfig if not defined by
+# command line
+MENUCONFIG_COLOR ?= mono
+
+.config:
+	@mkdir -p include/config include/generated
+	@kconfig-conf --alldefconfig Kconfig
+	@kconfig-conf --silentoldconfig Kconfig
+	@rm -rf include/config
+
+menuconfig:
+	@MENUCONFIG_COLOR=$(MENUCONFIG_COLOR) kconfig-mconf Kconfig
+	@mkdir -p include/config include/generated
+	@kconfig-conf --silentoldconfig Kconfig
+	@rm -rf include/config
+
+deleteconfig:
+	@rm -f .config
+	@rm -f .config.old
+	@rm -rf include
+
 # Automatically include rules.mk files
 include $(addsuffix /rules.mk,$(modules))
 
@@ -55,8 +81,7 @@ all: $(dirs) $(build_dir)/$(exec_name)
 $(build_dir)/$(exec_name): $(objects)
 	$(CC) $^ -o $@
 
-$(objects): $(build_dir)/%.o : %.c | $(dirs)
-	@echo "Compile $< and store it in $@"
+$(objects): $(build_dir)/%.o : %.c | $(dirs) .config
 	$(CC) $(CFLAGS) -MP -MD -c $< -o $@
 
 $(dirs):

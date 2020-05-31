@@ -1,0 +1,10 @@
+menu "Maths functions"
+
+	config MUL
+		bool "Enable multiplications"
+		default y
+
+	# Include subdirectories Kconfig
+	source maths_func/add/Kconfig
+
+endmenu

@@ -3,7 +3,9 @@ local_lib  := $(subdirectory)/$(my_dir_name).a
 local_src :=
 local_inc :=
 
-local_src += mul.c
+ifdef CONFIG_MUL
+  local_src += mul.c
+endif
 
 local_inc += $(subdirectory)
 

@@ -1,0 +1,12 @@
+menu "Other functions"
+
+	config SAY_HI
+		bool "Enable the \"Say hi\" function"
+		default y
+
+	config SAY_HI_TO
+		string "Say hello to whom ?"
+		default "World"
+		depends on SAY_HI
+
+endmenu

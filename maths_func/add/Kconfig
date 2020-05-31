@@ -1,0 +1,11 @@
+menu "Maths functions - addition options"
+
+	config ADD
+		bool "Add function that will sum given parameters"
+		default y
+
+	config ADD_2
+		bool "Add function that will add 2 to the given parameters"
+		default n
+
+endmenu
