@@ -30,7 +30,7 @@ dirs :=
 exec_name := try_me
 
 objects :=
-dependencies = $(subst .c,.d,$(sources))
+dependencies = $(subst .o,.d,$(objects))
 
 include_dirs :=
 CFLAGS += $(addprefix -I,$(include_dirs))
@@ -55,9 +55,9 @@ all: $(dirs) $(build_dir)/$(exec_name)
 $(build_dir)/$(exec_name): $(objects)
 	$(CC) $^ -o $@
 
-$(objects): $(build_dir)/%.o : %.c $(dirs)
+$(objects): $(build_dir)/%.o : %.c | $(dirs)
 	@echo "Compile $< and store it in $@"
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MP -MD -c $< -o $@
 
 $(dirs):
 	@mkdir -p $@
@@ -70,15 +70,5 @@ clean:
 	$(RM) $(build_dir)
 
 ifneq "$(MAKECMDGOALS)" "clean"
-	include $(dependencies)
+  -include $(dependencies)
 endif
-
-%.c %.h: %.y
-	$(YACC.y) --defines $<
-	$(MV) y.tab.c $*.c
-	$(MV) y.tab.h $*.h
-
-%.d: $(sources)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M $< | \
-		$(SED) 's,\($(notdir $*)\.o\) *:,$(dir $@)\1 $@: ,' > $@.tmp
-	$(MV) $@.tmp $@
