@@ -15,6 +15,17 @@ subdirectory = $(patsubst %/rules.mk,%,                        \
 my_dir_name = $(notdir $(patsubst %/,%,$(subdirectory)))
 
 
+# $(eval $(call add_rules,$(local_inc),$(subdirectory),$(local_src)))
+# This function will be used in included rules.mk files to add local source
+# files, include directories and objects to the Makefile.
+define add_rules
+    sources += $(addprefix $2/,$3)
+    include_dirs += $1
+    objects += $(addprefix $(build_dir)/,$(addprefix $2/,$(subst .c,.o,$3)))
+    dirs += $(addprefix $(build_dir)/,$2)
+endef
+
+
 # The directory where compiled files will be stored
 build_dir := build
 
