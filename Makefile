@@ -15,13 +15,19 @@ subdirectory = $(patsubst %/rules.mk,%,                        \
 my_dir_name = $(notdir $(patsubst %/,%,$(subdirectory)))
 
 
-# $(eval $(call add_rules,$(local_inc),$(subdirectory),$(local_src)))
+# $(eval $(call add_rules,\
+#               $(local_inc),\
+#               $(subdirectory),\
+#               $(local_src),\
+#               $(EXTRA_CFLAGS)))
 # This function will be used in included rules.mk files to add local source
 # files, include directories and objects to the Makefile.
 define add_rules
     sources += $(addprefix $2/,$3)
     include_dirs += $1
     objects += $(addprefix $(build_dir)/,$(addprefix $2/,$(subst .c,.o,$3)))
+    $(addprefix $(build_dir)/,$(addprefix $2/,$(subst .c,.o,$3))):\
+        EXTRA_CFLAGS:= $4
     dirs += $(addprefix $(build_dir)/,$2)
 endef
 
@@ -38,6 +44,9 @@ sources :=
 dirs :=
 
 exec_name := try_me
+
+# Debug build?
+DEBUG = 1
 
 objects :=
 dependencies = $(subst .o,.d,$(objects))
@@ -60,6 +69,11 @@ all:
 #Include the configuration file
 -include .config
 CFLAGS += $(addprefix -I,include/generated)
+CFLAGS += -MP -MD -Wall -Wextra -fdata-sections -ffunction-sections -Werror
+
+ifeq ($(DEBUG), 1)
+  CFLAGS += -g -gdwarf-2 -ggdb3
+endif
 
 # Let's use the mono black skin of the make menuconfig if not defined by
 # command line
@@ -92,7 +106,7 @@ $(build_dir)/$(exec_name): $(objects)
 	$(CC) $^ -o $@
 
 $(objects): $(build_dir)/%.o : %.c | $(dirs) .config
-	$(CC) $(CFLAGS) -MP -MD -c $< -o $@
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c $< -o $@
 
 $(dirs):
 	@mkdir -p $@

@@ -6,3 +6,8 @@ int say_hi(void) {
 
 	return 0;
 }
+
+
+static int print_wished_warning(int unused) {
+	return 0;
+}
